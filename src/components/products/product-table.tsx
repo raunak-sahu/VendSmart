@@ -22,11 +22,13 @@ type Product = {
 type Props = {
   products: Product[];
   onEdit: (product: Product) => void;
+  onDelete: (id: string) => void;
 };
 
 export default function ProductTable({
   products,
   onEdit,
+  onDelete,
 }: Props) {
   return (
     <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -175,17 +177,27 @@ export default function ProductTable({
               </td>
 
               {/* Actions */}
-              <td className="px-6 py-5">
+       {/* Actions */}
+<td className="px-6 py-5">
+  <div className="flex items-center gap-4">
 
-                <button
-                  onClick={() => onEdit(product)}
-                  className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm hover:bg-slate-100 transition"
-                >
-                  <Pencil size={14} />
-                  Edit
-                </button>
+    <button
+      onClick={() => onEdit(product)}
+      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
+    >
+      <Pencil size={14} />
+      Edit
+    </button>
 
-              </td>
+    <button
+      onClick={() => onDelete(product.id)}
+      className="text-red-600 hover:text-red-700 font-medium"
+    >
+      Delete
+    </button>
+
+  </div>
+</td>
 
             </tr>
           ))}

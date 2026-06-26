@@ -40,14 +40,14 @@ export default function ActivityFeed() {
             <div className="absolute left-0 top-2 h-3 w-3 rounded-full bg-indigo-600" />
 
             {index !== activities.length - 1 && (
-              <div className="absolute left-[5px] top-5 h-full w-[2px] bg-slate-200" />
+              <div className="absolute left-[5px] top-5 h-full w-[2px] bg-slate-200 dark:bg-slate-700" />
             )}
 
             <h3 className="font-medium">
               {item.title}
             </h3>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400 dark:text-slate-400 dark:text-slate-400">
               {item.desc}
             </p>
 

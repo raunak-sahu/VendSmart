@@ -5,38 +5,50 @@ import {
   BarChart,
   Bar,
   Tooltip,
+  CartesianGrid,
   XAxis,
 } from "recharts";
 
 const data = [
-  { month: "Jan", profit: 12000 },
-  { month: "Feb", profit: 16000 },
-  { month: "Mar", profit: 14000 },
-  { month: "Apr", profit: 21000 },
-  { month: "May", profit: 18000 },
-  { month: "Jun", profit: 26000 },
+  { month: "Jan", profit: 1800 },
+  { month: "Feb", profit: 2400 },
+  { month: "Mar", profit: 2900 },
+  { month: "Apr", profit: 3900 },
+  { month: "May", profit: 4500 },
+  { month: "Jun", profit: 5600 },
 ];
 
 export default function ProfitChart() {
   return (
-    <div className="h-[320px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
-          <XAxis
-            dataKey="month"
-            axisLine={false}
-            tickLine={false}
-          />
+    <div className="rounded-3xl border bg-white p-6 shadow-sm">
 
-          <Tooltip />
+      <h2 className="mb-6 text-xl font-bold">
+        Profit Trend
+      </h2>
 
-          <Bar
-            dataKey="profit"
-            radius={[8, 8, 0, 0]}
-            fill="#10B981"
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="h-80">
+
+        <ResponsiveContainer>
+
+          <BarChart data={data}>
+
+            <CartesianGrid strokeDasharray="3 3"/>
+
+            <XAxis dataKey="month"/>
+
+            <Tooltip/>
+
+            <Bar
+              dataKey="profit"
+              radius={[10,10,0,0]}
+            />
+
+          </BarChart>
+
+        </ResponsiveContainer>
+
+      </div>
+
     </div>
   );
 }

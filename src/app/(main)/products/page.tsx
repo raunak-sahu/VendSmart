@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductTable from "@/components/products/product-table";
 import SearchBar from "@/components/products/search-bar";
 import CategoryFilter from "@/components/products/category-filter";
 import AddProductDialog from "@/components/products/add-product-dialog";
 import EditProductDialog from "@/components/products/edit-product-dialog";
 
-/* ---------------- TYPES ---------------- */
 type Product = {
   id: string;
   productName: string;
@@ -16,142 +15,284 @@ type Product = {
   sellingPrice: number;
   currentStock: number;
   minimumStockThreshold: number;
+
+  profit?: number;
+  stockStatus?: "LOW" | "MEDIUM" | "OK";
 };
 
-type ProductInput = Omit<Product, "id">;
-
-/* ---------------- INITIAL DATA ---------------- */
-const initialProducts: Product[] = [
-  {
-    id: "1",
-    productName: "Maggi",
-    category: "Food",
-    costPrice: 10,
-    sellingPrice: 15,
-    currentStock: 200,
-    minimumStockThreshold: 20,
-  },
-  {
-    id: "2",
-    productName: "Pepsi",
-    category: "Drinks",
-    costPrice: 25,
-    sellingPrice: 35,
-    currentStock: 100,
-    minimumStockThreshold: 20,
-  },
-];
+type ProductInput = Omit<
+  Product,
+  "id" | "profit" | "stockStatus"
+>;
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [search, setSearch] = useState<string>("");
-  const [category, setCategory] = useState<string>("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
 
-  /* ---------------- EDIT & MODAL STATE ---------------- */
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [editingProduct, setEditingProduct] =
+    useState<Product | null>(null);
 
-  /* ---------------- HANDLERS ---------------- */
-  const handleAddProduct = (product: ProductInput) => {
-    const newProduct: Product = {
-      id:
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : Date.now().toString(),
-      ...product,
-    };
-    setProducts((prev) => [...prev, newProduct]);
-  };
+  const [editOpen, setEditOpen] = useState(false);
 
-  const handleUpdateProduct = (updated: Product) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updated.id ? updated : p))
-    );
-  };
+  /* ---------------- FETCH PRODUCTS ---------------- */
 
-  /* ---------------- ENRICH DATA ---------------- */
-  const enrichedProducts = products.map((product) => {
-    const profit = product.sellingPrice - product.costPrice;
-    let stockStatus: "LOW" | "MEDIUM" | "OK" = "OK";
+  const handleDeleteProduct = async (
+  id: string
+) => {
+  const confirmed = window.confirm(
+    "Delete this product?"
+  );
 
-    if (product.currentStock <= product.minimumStockThreshold) {
-      stockStatus = "LOW";
-    } else if (product.currentStock <= product.minimumStockThreshold * 2) {
-      stockStatus = "MEDIUM";
+  if (!confirmed) return;
+
+  try {
+    await fetch(`/api/products/${id}`, {
+      method: "DELETE",
+    });
+
+    fetchProducts();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await res.json();
+
+      setProducts(data);
+    } catch (error) {
+      console.error(error);
     }
+  };
 
-    return {
-      ...product,
-      profit,
-      stockStatus,
-    };
-  });
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  /* ---------------- FILTER LOGIC ---------------- */
-  const filteredProducts = enrichedProducts.filter((product) => {
-    const matchesSearch = product.productName
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  /* ---------------- ADD PRODUCT ---------------- */
 
-    const matchesCategory =
-      category === "all" || product.category === category;
+  const handleAddProduct = async (
+    product: ProductInput
+  ) => {
+    try {
+      await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(product),
+      });
 
-    return matchesSearch && matchesCategory;
-  });
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  /* ---------------- UPDATE PRODUCT (LOCAL FOR NOW) ---------------- */
+
+const handleUpdateProduct = async (
+  updated: Product
+) => {
+  try {
+    await fetch(
+      `/api/products/${updated.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify(updated),
+      }
+    );
+
+    fetchProducts();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+  /* ---------------- ENRICH PRODUCTS ---------------- */
+
+  const enrichedProducts = products.map(
+    (product) => {
+      const profit =
+        product.sellingPrice -
+        product.costPrice;
+
+      let stockStatus:
+        | "LOW"
+        | "MEDIUM"
+        | "OK" = "OK";
+
+      if (
+        product.currentStock <=
+        product.minimumStockThreshold
+      ) {
+        stockStatus = "LOW";
+      } else if (
+        product.currentStock <=
+        product.minimumStockThreshold * 2
+      ) {
+        stockStatus = "MEDIUM";
+      }
+
+      return {
+        ...product,
+        profit,
+        stockStatus,
+      };
+    }
+  );
+
+  /* ---------------- FILTERS ---------------- */
+
+  const filteredProducts =
+    enrichedProducts.filter((product) => {
+      const matchesSearch =
+        product.productName
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchesCategory =
+        category === "all" ||
+        product.category === category;
+
+      return (
+        matchesSearch && matchesCategory
+      );
+    });
 
   /* ---------------- UI ---------------- */
- return (
-  <div className="space-y-6">
 
-    {/* HEADER */}
-    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+  return (
+    <div className="space-y-6">
 
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Products
-        </h1>
-        <p className="text-gray-500 text-sm">
-          Manage your inventory, pricing & stock levels
-        </p>
+      {/* HEADER */}
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+        <div>
+          <h1 className="text-4xl font-bold">
+            Products
+          </h1>
+
+          <p className="text-gray-500 mt-1">
+            Manage inventory, stock levels,
+            pricing and profitability.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+
+          <SearchBar
+            search={search}
+            setSearch={setSearch}
+          />
+
+          <CategoryFilter
+            value={category}
+            onChange={setCategory}
+          />
+
+          <AddProductDialog
+            onAdd={handleAddProduct}
+          />
+
+        </div>
+
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center">
-        <SearchBar search={search} setSearch={setSearch} />
-        <CategoryFilter value={category} onChange={setCategory} />
-        <AddProductDialog onAdd={handleAddProduct} />
+      {/* STATS BAR */}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div className="rounded-2xl bg-white border p-5 shadow-sm">
+          <p className="text-gray-500 text-sm">
+            Total Products
+          </p>
+
+          <h2 className="text-3xl font-bold mt-2">
+            {products.length}
+          </h2>
+        </div>
+
+        <div className="rounded-2xl bg-white border p-5 shadow-sm">
+          <p className="text-gray-500 text-sm">
+            Low Stock
+          </p>
+
+          <h2 className="text-3xl font-bold mt-2 text-red-500">
+            {
+              enrichedProducts.filter(
+                (p) =>
+                  p.stockStatus === "LOW"
+              ).length
+            }
+          </h2>
+        </div>
+
+        <div className="rounded-2xl bg-white border p-5 shadow-sm">
+          <p className="text-gray-500 text-sm">
+            Categories
+          </p>
+
+          <h2 className="text-3xl font-bold mt-2">
+            {
+              new Set(
+                products.map(
+                  (p) => p.category
+                )
+              ).size
+            }
+          </h2>
+        </div>
+
       </div>
 
-    </div>
+      {/* TABLE */}
 
-    {/* TABLE CONTAINER */}
-    <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
 
-      <div className="p-4 border-b bg-gray-50">
-        <h2 className="font-semibold text-gray-700">
-          Inventory List
-        </h2>
-      </div>
+        <div className="border-b bg-gray-50 p-4">
+          <h2 className="font-semibold">
+            Inventory List
+          </h2>
+        </div>
 
-      <div className="p-2">
+        <div className="p-2">
         <ProductTable
-          products={filteredProducts}
-          onEdit={(product: Product) => {
-            setEditingProduct(product);
-            setEditOpen(true);
-          }}
-        />
+  products={filteredProducts}
+  onEdit={(product) => {
+    setEditingProduct(product);
+    setEditOpen(true);
+  }}
+  onDelete={handleDeleteProduct}
+/>
+        </div>
+
       </div>
 
+      {/* EDIT MODAL */}
+
+      <EditProductDialog
+        product={editingProduct}
+        open={editOpen}
+        onClose={() =>
+          setEditOpen(false)
+        }
+        onUpdate={handleUpdateProduct}
+      />
+
     </div>
-
-    {/* EDIT MODAL */}
-    <EditProductDialog
-      product={editingProduct}
-      open={editOpen}
-      onClose={() => setEditOpen(false)}
-      onUpdate={handleUpdateProduct}
-    />
-
-  </div>
-);
+  );
 }

@@ -1,107 +1,126 @@
 generator client {
- provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
- provider = "postgresql"
- url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
- ADMIN
- MANAGER
- EMPLOYEE
+  ADMIN
+  MANAGER
+  EMPLOYEE
 }
 
 model User {
- id        String   @id @default(cuid())
- name      String
- email     String   @unique
- password  String
- role      Role     @default(ADMIN)
- createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
 }
 
 model Vendor {
- id            String   @id @default(cuid())
- vendorName    String
- companyName   String
- gstNumber     String
- phoneNumber   String
- email         String
- address       String
- paymentTerms  String
- status        String
- createdAt     DateTime @default(now())
+  id           String   @id @default(cuid())
+  vendorName   String
+  companyName  String
+  gstNumber    String
+  phoneNumber  String
+  email        String
+  address      String
+  paymentTerms String
+  status       String
+  createdAt    DateTime @default(now())
 
- products      Product[]
- purchases     PurchaseBill[]
+  products  Product[]
+  purchases PurchaseBill[]
 }
 
 model Product {
- id                    String @id @default(cuid())
- productName           String
- category              String
- costPrice             Float
- sellingPrice          Float
- currentStock          Int
- minimumStockThreshold Int
+  id                    String @id @default(cuid())
+  productName           String
+  category              String
+  costPrice             Float
+  sellingPrice          Float
+  currentStock          Int
+  minimumStockThreshold Int
 
- batchNumber           String
- manufacturingDate     DateTime
- expiryDate            DateTime
+  batchNumber       String
+  manufacturingDate DateTime
+  expiryDate        DateTime
 
- vendorId              String
- vendor                Vendor @relation(fields: [vendorId], references: [id])
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
 
- purchaseItems         PurchaseItem[]
- salesItems            SalesItem[]
+  purchaseItems PurchaseItem[]
+  salesItems    SalesItem[]
+  transactions  InventoryTransaction[]
 }
 
 model PurchaseBill {
- id             String @id @default(cuid())
- invoiceNumber  String @unique
- purchaseDate   DateTime
- totalAmount    Float
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  purchaseDate  DateTime
+  totalAmount   Float
 
- vendorId       String
- vendor          Vendor @relation(fields: [vendorId], references: [id])
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
 
- items          PurchaseItem[]
+  items PurchaseItem[]
 }
 
 model PurchaseItem {
- id              String @id @default(cuid())
- quantity        Int
- costPrice       Float
+  id        String @id @default(cuid())
+  quantity  Int
+  costPrice Float
 
- purchaseBillId  String
- productId        String
+  purchaseBillId String
+  productId      String
 
- purchaseBill     PurchaseBill @relation(fields:[purchaseBillId],references:[id])
- product          Product @relation(fields:[productId],references:[id])
+  purchaseBill PurchaseBill @relation(fields: [purchaseBillId], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
 }
 
 model SalesBill {
- id             String @id @default(cuid())
- invoiceNumber  String @unique
- customerName   String
- paymentMethod  String
- totalAmount    Float
- profit         Float
- date           DateTime
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  customerName  String
+  paymentMethod String
+  totalAmount   Float
+  profit        Float
+  date          DateTime
 
- items          SalesItem[]
+  items SalesItem[]
 }
 
 model SalesItem {
- id             String @id @default(cuid())
- quantitySold   Int
- sellingPrice   Float
+  id           String @id @default(cuid())
+  quantitySold Int
+  sellingPrice Float
 
- salesBillId    String
- productId       String
+  salesBillId String
+  productId   String
 
- salesBill      SalesBill @relation(fields:[salesBillId],references:[id])
- product         Product @relation(fields:[productId],references:[id])
+  salesBill SalesBill @relation(fields: [salesBillId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+enum TransactionType {
+  SALE
+  PURCHASE
+}
+
+model InventoryTransaction {
+  id String @id @default(cuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity Int
+
+  transactionType TransactionType
+
+  createdAt DateTime @default(now())
 }
