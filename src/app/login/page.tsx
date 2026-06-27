@@ -12,42 +12,57 @@ export default function LoginPage() {
   const [password, setPassword] =
     useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const handleLogin = async () => {
-    const res = await fetch(
-      "/api/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        "/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data =
+        await res.json();
+
+      if (res.ok) {
+        console.log(
+          "COOKIE AFTER SET:",
+          document.cookie
+        );
+
+        localStorage.setItem(
+          "role",
+          data.user.role
+        );
+
+        window.location.href =
+          "/dashboard";
+      } else {
+        setError(
+          data.error || "Login failed"
+        );
       }
-    );
-
-    const data =
-      await res.json();
-if (res.ok) {
-
-  
-  console.log(
-    "COOKIE AFTER SET:",
-    document.cookie
-  );
-
-  localStorage.setItem(
-    "role",
-    data.user.role
-  );
-
-  window.location.href =
-    "/dashboard";
-}
-else {
-      alert(data.error);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(
+        "An error occurred. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,6 +79,12 @@ else {
           Welcome to VendSmart
         </p>
 
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
+            {error}
+          </div>
+        )}
+
         <input
           placeholder="Email"
           className="mt-6 w-full rounded-xl border p-3"
@@ -73,6 +94,7 @@ else {
               e.target.value
             )
           }
+          disabled={loading}
         />
 
         <input
@@ -85,13 +107,15 @@ else {
               e.target.value
             )
           }
+          disabled={loading}
         />
 
         <button
           onClick={handleLogin}
-          className="mt-6 w-full rounded-xl bg-indigo-600 py-3 text-white"
+          disabled={loading}
+          className="mt-6 w-full rounded-xl bg-indigo-600 py-3 text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
       </div>
