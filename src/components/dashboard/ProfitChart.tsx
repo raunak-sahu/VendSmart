@@ -23,14 +23,24 @@ export default function RevenueChart() {
   const [data, setData] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/dashboard/revenue")
-      .then((r) => r.json())
-      .then((res) => {
-        setData(res);
-        setLoading(false);
-      });
-  }, []);
+ useEffect(() => {
+  fetch("/api/dashboard/revenue")
+    .then(async (r) => {
+      if (!r.ok) {
+        console.error("Revenue API failed:", r.status);
+        return [];
+      }
+      return r.json();
+    })
+    .then((res) => {
+      setData(res);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Revenue fetch error:", err);
+      setLoading(false);
+    });
+}, []);
 
   return (
     <div

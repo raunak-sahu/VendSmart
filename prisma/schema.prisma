@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  MANAGER
-  EMPLOYEE
-}
-
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -20,10 +14,13 @@ model User {
   password  String
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
+
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
 }
 
 model Vendor {
-  id           String   @id @default(cuid())
+  id           String         @id @default(cuid())
   vendorName   String
   companyName  String
   gstNumber    String
@@ -32,95 +29,87 @@ model Vendor {
   address      String
   paymentTerms String
   status       String
-  createdAt    DateTime @default(now())
-
-  products  Product[]
-  purchases PurchaseBill[]
+  createdAt    DateTime       @default(now())
+  
+  products     Product[]
+  purchases    PurchaseBill[]
 }
 
 model Product {
-  id                    String @id @default(cuid())
+  id                    String                 @id @default(cuid())
   productName           String
   category              String
   costPrice             Float
   sellingPrice          Float
   currentStock          Int
   minimumStockThreshold Int
-
-  batchNumber       String
-  manufacturingDate DateTime
-  expiryDate        DateTime
-
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-
-  purchaseItems PurchaseItem[]
-  salesItems    SalesItem[]
-  transactions  InventoryTransaction[]
+  batchNumber           String
+  manufacturingDate     DateTime
+  expiryDate            DateTime
+  vendorId              String
+  transactions          InventoryTransaction[]
+  vendor                Vendor                 @relation(fields: [vendorId], references: [id])
+  purchaseItems         PurchaseItem[]
+  salesItems            SalesItem[]
 }
 
 model PurchaseBill {
-  id            String   @id @default(cuid())
-  invoiceNumber String   @unique
+  id            String         @id @default(cuid())
+  invoiceNumber String         @unique
   purchaseDate  DateTime
   totalAmount   Float
-
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-
-  items PurchaseItem[]
+  vendorId      String
+  vendor        Vendor         @relation(fields: [vendorId], references: [id])
+  items         PurchaseItem[]
 }
 
 model PurchaseItem {
-  id        String @id @default(cuid())
-  quantity  Int
-  costPrice Float
-
+  id             String       @id @default(cuid())
+  quantity       Int
+  costPrice      Float
   purchaseBillId String
   productId      String
-
-  purchaseBill PurchaseBill @relation(fields: [purchaseBillId], references: [id])
-  product      Product      @relation(fields: [productId], references: [id])
+  product        Product      @relation(fields: [productId], references: [id])
+  purchaseBill   PurchaseBill @relation(fields: [purchaseBillId], references: [id])
 }
 
 model SalesBill {
-  id            String   @id @default(cuid())
-  invoiceNumber String   @unique
+  id            String      @id @default(cuid())
+  invoiceNumber String      @unique
   customerName  String
   paymentMethod String
   totalAmount   Float
   profit        Float
   date          DateTime
-
-  items SalesItem[]
+  items         SalesItem[]
 }
 
 model SalesItem {
-  id           String @id @default(cuid())
+  id           String    @id @default(cuid())
   quantitySold Int
   sellingPrice Float
+  salesBillId  String
+  productId    String
+  product      Product   @relation(fields: [productId], references: [id])
+  salesBill    SalesBill @relation(fields: [salesBillId], references: [id])
+}
 
-  salesBillId String
-  productId   String
+model InventoryTransaction {
+  id              String          @id @default(cuid())
+  productId       String
+  quantity        Int
+  transactionType TransactionType
+  createdAt       DateTime        @default(now())
+  product         Product         @relation(fields: [productId], references: [id])
+}
 
-  salesBill SalesBill @relation(fields: [salesBillId], references: [id])
-  product   Product   @relation(fields: [productId], references: [id])
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
 }
 
 enum TransactionType {
   SALE
   PURCHASE
-}
-
-model InventoryTransaction {
-  id String @id @default(cuid())
-
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-
-  quantity Int
-
-  transactionType TransactionType
-
-  createdAt DateTime @default(now())
 }

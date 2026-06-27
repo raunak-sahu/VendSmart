@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ProductTable from "@/components/products/product-table";
+
+import ProductTable from "@/components/products/ProductTable";
 import SearchBar from "@/components/products/search-bar";
 import CategoryFilter from "@/components/products/category-filter";
-import AddProductDialog from "@/components/products/add-product-dialog";
+import AddProductDialog from "@/components/products/AddProductDialog";
 import EditProductDialog from "@/components/products/edit-product-dialog";
+
+import ProductStats from "@/components/products/ProductStats";
 
 type Product = {
   id: string;
@@ -37,26 +40,6 @@ export default function ProductsPage() {
 
   /* ---------------- FETCH PRODUCTS ---------------- */
 
-  const handleDeleteProduct = async (
-  id: string
-) => {
-  const confirmed = window.confirm(
-    "Delete this product?"
-  );
-
-  if (!confirmed) return;
-
-  try {
-    await fetch(`/api/products/${id}`, {
-      method: "DELETE",
-    });
-
-    fetchProducts();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
   const fetchProducts = async () => {
     try {
       const res = await fetch("/api/products");
@@ -66,7 +49,6 @@ export default function ProductsPage() {
       }
 
       const data = await res.json();
-
       setProducts(data);
     } catch (error) {
       console.error(error);
@@ -77,11 +59,26 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  /* ---------------- ADD PRODUCT ---------------- */
+  /* ---------------- DELETE ---------------- */
 
-  const handleAddProduct = async (
-    product: ProductInput
-  ) => {
+  const handleDeleteProduct = async (id: string) => {
+    const confirmed = window.confirm("Delete this product?");
+    if (!confirmed) return;
+
+    try {
+      await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  /* ---------------- ADD ---------------- */
+
+  const handleAddProduct = async (product: ProductInput) => {
     try {
       await fetch("/api/products", {
         method: "POST",
@@ -97,62 +94,50 @@ export default function ProductsPage() {
     }
   };
 
-  /* ---------------- UPDATE PRODUCT (LOCAL FOR NOW) ---------------- */
+  /* ---------------- UPDATE ---------------- */
 
-const handleUpdateProduct = async (
-  updated: Product
-) => {
-  try {
-    await fetch(
-      `/api/products/${updated.id}`,
-      {
+  const handleUpdateProduct = async (updated: Product) => {
+    try {
+      await fetch(`/api/products/${updated.id}`, {
         method: "PUT",
         headers: {
-          "Content-Type":
-            "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updated),
-      }
-    );
+      });
 
-    fetchProducts();
-  } catch (error) {
-    console.error(error);
-  }
-};
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   /* ---------------- ENRICH PRODUCTS ---------------- */
 
-  const enrichedProducts = products.map(
-    (product) => {
-      const profit =
-        product.sellingPrice -
-        product.costPrice;
+  const enrichedProducts = products.map((product) => {
+    const profit =
+      product.sellingPrice - product.costPrice;
 
-      let stockStatus:
-        | "LOW"
-        | "MEDIUM"
-        | "OK" = "OK";
+    let stockStatus: "LOW" | "MEDIUM" | "OK" = "OK";
 
-      if (
-        product.currentStock <=
-        product.minimumStockThreshold
-      ) {
-        stockStatus = "LOW";
-      } else if (
-        product.currentStock <=
-        product.minimumStockThreshold * 2
-      ) {
-        stockStatus = "MEDIUM";
-      }
-
-      return {
-        ...product,
-        profit,
-        stockStatus,
-      };
+    if (
+      product.currentStock <=
+      product.minimumStockThreshold
+    ) {
+      stockStatus = "LOW";
+    } else if (
+      product.currentStock <=
+      product.minimumStockThreshold * 2
+    ) {
+      stockStatus = "MEDIUM";
     }
-  );
+
+    return {
+      ...product,
+      profit,
+      stockStatus,
+    };
+  });
 
   /* ---------------- FILTERS ---------------- */
 
@@ -167,10 +152,19 @@ const handleUpdateProduct = async (
         category === "all" ||
         product.category === category;
 
-      return (
-        matchesSearch && matchesCategory
-      );
+      return matchesSearch && matchesCategory;
     });
+
+  /* ---------------- STATS ---------------- */
+
+  const totalProfit = enrichedProducts.reduce(
+    (acc, p) => acc + (p.profit ?? 0),
+    0
+  );
+
+  const lowStockCount = enrichedProducts.filter(
+    (p) => p.stockStatus === "LOW"
+  ).length;
 
   /* ---------------- UI ---------------- */
 
@@ -178,21 +172,19 @@ const handleUpdateProduct = async (
     <div className="space-y-6">
 
       {/* HEADER */}
-
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
         <div>
-          <h1 className="text-4xl font-bold">
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
             Products
           </h1>
 
-          <p className="text-gray-500 mt-1">
-            Manage inventory, stock levels,
-            pricing and profitability.
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Manage inventory, stock levels, pricing and profitability.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 items-center">
 
           <SearchBar
             search={search}
@@ -212,84 +204,50 @@ const handleUpdateProduct = async (
 
       </div>
 
-      {/* STATS BAR */}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-        <div className="rounded-2xl bg-white border p-5 shadow-sm">
-          <p className="text-gray-500 text-sm">
-            Total Products
-          </p>
-
-          <h2 className="text-3xl font-bold mt-2">
-            {products.length}
-          </h2>
-        </div>
-
-        <div className="rounded-2xl bg-white border p-5 shadow-sm">
-          <p className="text-gray-500 text-sm">
-            Low Stock
-          </p>
-
-          <h2 className="text-3xl font-bold mt-2 text-red-500">
-            {
-              enrichedProducts.filter(
-                (p) =>
-                  p.stockStatus === "LOW"
-              ).length
-            }
-          </h2>
-        </div>
-
-        <div className="rounded-2xl bg-white border p-5 shadow-sm">
-          <p className="text-gray-500 text-sm">
-            Categories
-          </p>
-
-          <h2 className="text-3xl font-bold mt-2">
-            {
-              new Set(
-                products.map(
-                  (p) => p.category
-                )
-              ).size
-            }
-          </h2>
-        </div>
-
-      </div>
+      {/* STATS */}
+      <ProductStats
+        total={products.length}
+        lowStock={lowStockCount}
+        totalProfit={totalProfit}
+      />
 
       {/* TABLE */}
+      <div className="
+        rounded-2xl border
+        border-slate-200 dark:border-slate-800
+        bg-white dark:bg-slate-900
+        overflow-hidden
+      ">
 
-      <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-
-        <div className="border-b bg-gray-50 p-4">
-          <h2 className="font-semibold">
+        <div className="
+          border-b border-slate-200 dark:border-slate-800
+          p-4
+        ">
+          <h2 className="font-semibold text-slate-900 dark:text-white">
             Inventory List
           </h2>
         </div>
 
         <div className="p-2">
-        <ProductTable
-  products={filteredProducts}
-  onEdit={(product) => {
-    setEditingProduct(product);
-    setEditOpen(true);
-  }}
-  onDelete={handleDeleteProduct}
-/>
+
+          <ProductTable
+            products={filteredProducts}
+            onEdit={(product) => {
+              setEditingProduct(product);
+              setEditOpen(true);
+            }}
+            onDelete={handleDeleteProduct}
+          />
+
         </div>
 
       </div>
 
       {/* EDIT MODAL */}
-
       <EditProductDialog
         product={editingProduct}
         open={editOpen}
-        onClose={() =>
-          setEditOpen(false)
-        }
+        onClose={() => setEditOpen(false)}
         onUpdate={handleUpdateProduct}
       />
 

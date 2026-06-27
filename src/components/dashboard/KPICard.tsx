@@ -51,10 +51,7 @@ dark:shadow-black/30
 </p>
 
 <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-white">
-    <AnimatedCounter
-        value={value}
-        prefix={prefix}
-    />
+  {prefix ?? ""}{value.toLocaleString()}
 </h2>
         </div>
 
