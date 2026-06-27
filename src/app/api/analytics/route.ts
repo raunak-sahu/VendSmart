@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// Use a lightweight local shape for analytics data to avoid Prisma type issues.
 type ProductData = {
   currentStock: number;
   costPrice: number;
