@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -20,7 +20,7 @@ type Dashboard = {
 
 export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
-
+const router = useRouter();
  useEffect(() => {
   fetch("/api/dashboard/insights")
     .then((res) => res.json())
@@ -29,7 +29,15 @@ export default function DashboardPage() {
       setData(json);
     });
 }, []);
-
+useEffect(() => {
+  fetch("/api/auth/me")
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data.user) {
+        router.push("/login");
+      }
+    });
+}, []);
   return (
     <div className="space-y-6">
 
