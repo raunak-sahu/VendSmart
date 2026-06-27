@@ -57,9 +57,10 @@ export default function LoginPage() {
         );
       }
     } catch (err) {
-      console.error("Login error:", err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      console.error("Login error:", errorMsg, err);
       setError(
-        "An error occurred. Please try again."
+        `Error: ${errorMsg}`
       );
     } finally {
       setLoading(false);

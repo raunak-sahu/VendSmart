@@ -20,24 +20,28 @@ export async function GET() {
     },
   });
 
-  await prisma.user.createMany({
-    data: [
-      {
-        name: "Manager",
-        email: "manager@vendsmart.com",
-        password,
-        role: "MANAGER",
-        vendorId: vendor.id,
-      },
-      {
-        name: "Employee",
-        email: "employee@vendsmart.com",
-        password,
-        role: "EMPLOYEE",
-        vendorId: vendor.id,
-      },
-    ],
-    skipDuplicates: true,
+  await prisma.user.upsert({
+    where: { email: "manager@vendsmart.com" },
+    update: {},
+    create: {
+      name: "Manager",
+      email: "manager@vendsmart.com",
+      password,
+      role: "MANAGER",
+      vendorId: vendor.id,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "employee@vendsmart.com" },
+    update: {},
+    create: {
+      name: "Employee",
+      email: "employee@vendsmart.com",
+      password,
+      role: "EMPLOYEE",
+      vendorId: vendor.id,
+    },
   });
 
   return Response.json({

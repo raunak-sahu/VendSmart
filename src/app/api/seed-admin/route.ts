@@ -20,8 +20,12 @@ export async function GET() {
     },
   });
 
-  const user = await prisma.user.create({
-    data: {
+  const user = await prisma.user.upsert({
+    where: {
+      email: "admin@vendsmart.com",
+    },
+    update: {},
+    create: {
       name: "Admin",
       email: "admin@vendsmart.com",
       password,
@@ -30,5 +34,5 @@ export async function GET() {
     },
   });
 
-  return Response.json(user);
+  return Response.json({ success: true, user });
 }
