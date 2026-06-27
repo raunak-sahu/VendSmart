@@ -2,8 +2,23 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
-  const password =
-    await bcrypt.hash("123456", 10);
+  const password = await bcrypt.hash("123456", 10);
+
+  const vendor = await prisma.vendor.upsert({
+    where: { id: "default-vendor" },
+    update: {},
+    create: {
+      id: "default-vendor",
+      vendorName: "Default Vendor",
+      companyName: "VendSmart",
+      gstNumber: "GST123456789",
+      phoneNumber: "9999999999",
+      email: "vendor@vendsmart.com",
+      address: "Default Address",
+      paymentTerms: "Net 30",
+      status: "ACTIVE",
+    },
+  });
 
   await prisma.user.createMany({
     data: [
@@ -12,12 +27,14 @@ export async function GET() {
         email: "manager@vendsmart.com",
         password,
         role: "MANAGER",
+        vendorId: vendor.id,
       },
       {
         name: "Employee",
         email: "employee@vendsmart.com",
         password,
         role: "EMPLOYEE",
+        vendorId: vendor.id,
       },
     ],
     skipDuplicates: true,
