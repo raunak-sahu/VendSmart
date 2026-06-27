@@ -15,12 +15,13 @@ model User {
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
 
-  vendorId  String
-  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  // IMPORTANT: made optional for safe migration
+  vendorId  String?
+  vendor    Vendor?  @relation(fields: [vendorId], references: [id], onDelete: SetNull)
 }
 
 model Vendor {
-  id           String         @id @default(cuid())
+  id           String   @id @default(cuid())
   vendorName   String
   companyName  String
   gstNumber    String
@@ -29,15 +30,16 @@ model Vendor {
   address      String
   paymentTerms String
   status       String
-  createdAt    DateTime       @default(now())
+  createdAt    DateTime @default(now())
 
   users        User[]
   products     Product[]
   purchases    PurchaseBill[]
+  sales        SalesBill[]
 }
 
 model Product {
-  id                    String                 @id @default(cuid())
+  id                    String   @id @default(cuid())
   productName           String
   category              String
   costPrice             Float
@@ -47,20 +49,24 @@ model Product {
   batchNumber           String
   manufacturingDate     DateTime
   expiryDate            DateTime
+
   vendorId              String
+  vendor                Vendor   @relation(fields: [vendorId], references: [id])
+
   transactions          InventoryTransaction[]
-  vendor                Vendor                 @relation(fields: [vendorId], references: [id])
   purchaseItems         PurchaseItem[]
   salesItems            SalesItem[]
 }
 
 model PurchaseBill {
-  id            String         @id @default(cuid())
-  invoiceNumber String         @unique
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
   purchaseDate  DateTime
   totalAmount   Float
+
   vendorId      String
-  vendor        Vendor         @relation(fields: [vendorId], references: [id])
+  vendor        Vendor   @relation(fields: [vendorId], references: [id])
+
   items         PurchaseItem[]
 }
 
@@ -68,40 +74,49 @@ model PurchaseItem {
   id             String       @id @default(cuid())
   quantity       Int
   costPrice      Float
+
   purchaseBillId String
   productId      String
+
   product        Product      @relation(fields: [productId], references: [id])
   purchaseBill   PurchaseBill @relation(fields: [purchaseBillId], references: [id])
 }
 
 model SalesBill {
-  id            String      @id @default(cuid())
-  invoiceNumber String      @unique
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
   customerName  String
   paymentMethod String
   totalAmount   Float
   profit        Float
   date          DateTime
+
+  vendorId      String?
+  vendor        Vendor?  @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
   items         SalesItem[]
 }
 
 model SalesItem {
-  id           String    @id @default(cuid())
+  id           String  @id @default(cuid())
   quantitySold Int
   sellingPrice Float
+
   salesBillId  String
   productId    String
+
   product      Product   @relation(fields: [productId], references: [id])
   salesBill    SalesBill @relation(fields: [salesBillId], references: [id])
 }
 
 model InventoryTransaction {
-  id              String          @id @default(cuid())
+  id              String   @id @default(cuid())
   productId       String
   quantity        Int
   transactionType TransactionType
-  createdAt       DateTime        @default(now())
-  product         Product         @relation(fields: [productId], references: [id])
+  createdAt       DateTime @default(now())
+
+  product         Product  @relation(fields: [productId], references: [id])
 }
 
 enum Role {
