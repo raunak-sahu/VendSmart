@@ -36,14 +36,14 @@ export async function POST(req: Request) {
       { status: 401 }
     );
   }
-
-  const token = jwt.sign(
-    {
-      userId: user.id,
-      role: user.role,
-    },
-    "secret123"
-  );
+const token = jwt.sign(
+  {
+    userId: user.id,
+    vendorId: user.vendorId,
+    role: user.role,
+  },
+  process.env.JWT_SECRET || "secret123"
+);
 
   const response = NextResponse.json({
     success: true,

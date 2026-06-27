@@ -1,31 +1,24 @@
 import * as jwt from "jsonwebtoken";
 
-const JWT_SECRET = "secret123";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "secret123";
 
-export function verifyToken(
-  token: string
-) {
+export function verifyToken(token: string) {
   try {
     const decoded = jwt.verify(
       token,
       JWT_SECRET
     );
 
-    console.log(
-      "DECODED TOKEN:",
-      decoded
-    );
+    console.log("DECODED TOKEN:", decoded);
 
     return decoded as {
       userId: string;
+      vendorId: string;
       role: string;
     };
   } catch (error) {
-    console.error(
-      "JWT VERIFY ERROR:",
-      error
-    );
-
+    console.error("JWT VERIFY ERROR:", error);
     return null;
   }
 }
