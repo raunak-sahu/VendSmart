@@ -1,32 +1,35 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { Product } from "@prisma/client";
+
+type ProductData = {
+  currentStock: number;
+  costPrice: number;
+  sellingPrice: number;
+  minimumStockThreshold: number;
+};
 
 export async function GET() {
-  const products: Product[] =
-    await prisma.product.findMany();
+  const products = await prisma.product.findMany();
 
   const totalInventoryValue = products.reduce(
-    (sum: number, p: Product) =>
+    (sum: number, p: ProductData) =>
       sum + p.currentStock * p.costPrice,
     0
   );
 
   const totalRetailValue = products.reduce(
-    (sum: number, p: Product) =>
-      sum +
-      p.currentStock * p.sellingPrice,
+    (sum: number, p: ProductData) =>
+      sum + p.currentStock * p.sellingPrice,
     0
   );
 
   const lowStock = products.filter(
-    (p: Product) =>
-      p.currentStock <=
-      p.minimumStockThreshold
+    (p: ProductData) =>
+      p.currentStock <= p.minimumStockThreshold
   ).length;
 
   const totalItems = products.reduce(
-    (sum: number, p: Product) =>
+    (sum: number, p: ProductData) =>
       sum + p.currentStock,
     0
   );
