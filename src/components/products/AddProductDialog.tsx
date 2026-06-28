@@ -21,6 +21,7 @@ type Props = {
 };
 
 export default function AddProductDialog({ onAdd }: Props) {
+  console.log("NEW ADD PRODUCT DIALOG LOADED");
   const [open, setOpen] = useState(false);
 
 const [form, setForm] = useState<ProductInput>({
