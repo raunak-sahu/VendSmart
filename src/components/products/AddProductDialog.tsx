@@ -8,10 +8,10 @@ export type ProductInput = {
   sellingPrice: number;
   currentStock: number;
   minimumStockThreshold: number;
-  batchNumber?: string;
-  manufacturingDate?: string;
-  expiryDate?: string;
-  vendorId?: string;
+
+  batchNumber: string;
+  manufacturingDate: string;
+  expiryDate: string;
 };
 
 type Props = {
@@ -23,13 +23,19 @@ type Props = {
 export default function AddProductDialog({ onAdd }: Props) {
   const [open, setOpen] = useState(false);
 
-const [form, setForm] = useState({
+const [form, setForm] = useState<ProductInput>({
   productName: "",
   category: "Food",
-  costPrice: "",
-  sellingPrice: "",
-  currentStock: "",
-  minimumStockThreshold: "",
+
+  costPrice: 0,
+  sellingPrice: 0,
+
+  currentStock: 0,
+  minimumStockThreshold: 0,
+
+  batchNumber: "",
+  manufacturingDate: "",
+  expiryDate: "",
 });
 
   const handleChange = (
@@ -59,13 +65,19 @@ onAdd({
   ),
 });
 
- setForm({
+setForm({
   productName: "",
   category: "Food",
-  costPrice: "",
-  sellingPrice: "",
-  currentStock: "",
-  minimumStockThreshold: "",
+
+  costPrice: 0,
+  sellingPrice: 0,
+
+  currentStock: 0,
+  minimumStockThreshold: 0,
+
+  batchNumber: "",
+  manufacturingDate: "",
+  expiryDate: "",
 });
     setOpen(false);
   };
@@ -194,6 +206,71 @@ onAdd({
               />
 
             </div>
+
+<div className="grid grid-cols-2 gap-4">
+
+  <div>
+    <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+      Batch Number
+    </label>
+
+    <input
+      name="batchNumber"
+      value={form.batchNumber}
+      onChange={handleChange}
+      placeholder="e.g. MAG-2026-001"
+      className="
+        w-full rounded-xl border px-4 py-3
+        bg-white dark:bg-slate-800
+        border-slate-200 dark:border-slate-700
+        text-slate-900 dark:text-white
+      "
+    />
+  </div>
+
+</div>
+
+<div className="grid grid-cols-2 gap-4">
+
+  <div>
+    <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+      Manufacturing Date
+    </label>
+
+    <input
+      name="manufacturingDate"
+      type="date"
+      value={form.manufacturingDate}
+      onChange={handleChange}
+      className="
+        w-full rounded-xl border px-4 py-3
+        bg-white dark:bg-slate-800
+        border-slate-200 dark:border-slate-700
+        text-slate-900 dark:text-white
+      "
+    />
+  </div>
+
+  <div>
+    <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+      Expiry Date
+    </label>
+
+    <input
+      name="expiryDate"
+      type="date"
+      value={form.expiryDate}
+      onChange={handleChange}
+      className="
+        w-full rounded-xl border px-4 py-3
+        bg-white dark:bg-slate-800
+        border-slate-200 dark:border-slate-700
+        text-slate-900 dark:text-white
+      "
+    />
+  </div>
+
+</div>
 
             {/* Actions */}
             <div className="flex justify-end gap-2 pt-2">
