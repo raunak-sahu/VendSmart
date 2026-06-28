@@ -38,46 +38,40 @@ export async function PUT(
     };
   }
 ) {
-  const body =
-    await req.json();
+  const body = await req.json();
 
-  const updatedProduct =
-    await prisma.product.update({
-      where: {
-        id: params.id,
-      },
-      data: {
-        productName:
-          body.productName,
+  const updatedProduct = await prisma.product.update({
+    where: {
+      id: params.id,
+    },
+    data: {
+      productName: body.productName,
+      category: body.category,
 
-        category:
-          body.category,
+      costPrice: Number(body.costPrice),
+      sellingPrice: Number(body.sellingPrice),
 
-        costPrice:
-          Number(
-            body.costPrice
-          ),
+      currentStock: Number(body.currentStock),
+      minimumStockThreshold: Number(body.minimumStockThreshold),
 
-        sellingPrice:
-          Number(
-            body.sellingPrice
-          ),
+      // ✅ ADD THESE (IMPORTANT)
+      batchNumber: body.batchNumber,
 
-        currentStock:
-          Number(
-            body.currentStock
-          ),
+      manufacturingDate:
+        body.manufacturingDate &&
+        !isNaN(Date.parse(body.manufacturingDate))
+          ? new Date(body.manufacturingDate)
+          : undefined,
 
-        minimumStockThreshold:
-          Number(
-            body.minimumStockThreshold
-          ),
-      },
-    });
+      expiryDate:
+        body.expiryDate &&
+        !isNaN(Date.parse(body.expiryDate))
+          ? new Date(body.expiryDate)
+          : undefined,
+    },
+  });
 
-  return NextResponse.json(
-    updatedProduct
-  );
+  return NextResponse.json(updatedProduct);
 }
 
 export async function DELETE(

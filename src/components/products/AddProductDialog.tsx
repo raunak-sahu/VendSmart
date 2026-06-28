@@ -154,69 +154,72 @@ const [form, setForm] = useState<ProductInput>({
               <option value="Electronics">Electronics</option>
             </select>
 
-            <div className="grid grid-cols-2 gap-3">
+           <div className="grid grid-cols-2 gap-3">
 
-              <input
-                name="costPrice"
-                type="number"
-                placeholder="Cost Price (₹)"
-                value={form.costPrice}
-                onChange={handleChange}
-                className="
-                  w-full rounded-xl border px-3 py-2
-                  bg-white dark:bg-slate-800
-                  border-slate-200 dark:border-slate-700
-                  text-slate-900 dark:text-white
-                "
-              />
+  <div>
+    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+      Cost Price (₹)
+    </label>
 
-              <input
-                name="sellingPrice"
-                type="number"
-                placeholder="Selling Price (₹)"
-                value={form.sellingPrice}
-                onChange={handleChange}
-                className="
-                  w-full rounded-xl border px-3 py-2
-                  bg-white dark:bg-slate-800
-                  border-slate-200 dark:border-slate-700
-                  text-slate-900 dark:text-white
-                "
-              />
+    <input
+      name="costPrice"
+      type="number"
+      value={form.costPrice}
+      onChange={handleChange}
+      className="w-full rounded-xl border px-3 py-2 bg-white dark:bg-slate-800 text-black dark:text-white"
+    />
+  </div>
 
-            </div>
+  <div>
+    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+      Selling Price (₹)
+    </label>
 
-            <div className="grid grid-cols-2 gap-3">
+    <input
+      name="sellingPrice"
+      type="number"
+      value={form.sellingPrice}
+      onChange={handleChange}
+      className="w-full rounded-xl border px-3 py-2 bg-white dark:bg-slate-800 text-black dark:text-white"
+    />
+  </div>
 
-              <input
-                name="currentStock"
-                type="number"
-                placeholder="Current Stock Quantity"
-                value={form.currentStock}
-                onChange={handleChange}
-                className="
-                  w-full rounded-xl border px-3 py-2
-                  bg-white dark:bg-slate-800
-                  border-slate-200 dark:border-slate-700
-                  text-slate-900 dark:text-white
-                "
-              />
+</div>
 
-              <input
-                name="minimumStockThreshold"
-                type="number"
-                placeholder="Low Stock Alert Threshold"
-                value={form.minimumStockThreshold}
-                onChange={handleChange}
-                className="
-                  w-full rounded-xl border px-3 py-2
-                  bg-white dark:bg-slate-800
-                  border-slate-200 dark:border-slate-700
-                  text-slate-900 dark:text-white
-                "
-              />
+             <div className="grid grid-cols-2 gap-3 mt-3">
 
-            </div>
+  <div>
+    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+      Current Stock
+    </label>
+
+    <input
+      name="currentStock"
+      type="number"
+      value={form.currentStock}
+      onChange={handleChange}
+      className="w-full rounded-xl border px-3 py-2 bg-white dark:bg-slate-800 text-black dark:text-white"
+    />
+  </div>
+
+  <div>
+    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+      Low Stock Alert
+    </label>
+
+    <input
+      name="minimumStockThreshold"
+      type="number"
+      value={form.minimumStockThreshold}
+      onChange={handleChange}
+      className="w-full rounded-xl border px-3 py-2 bg-white dark:bg-slate-800 text-black dark:text-white"
+    />
+  </div>
+
+</div>
+            
+
+         
 
 <div className="grid grid-cols-2 gap-4">
 
