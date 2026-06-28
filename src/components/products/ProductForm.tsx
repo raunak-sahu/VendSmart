@@ -9,6 +9,10 @@ type ProductInput = {
   sellingPrice: number;
   currentStock: number;
   minimumStockThreshold: number;
+
+  batchNumber: string;
+  manufacturingDate: string;
+  expiryDate: string;
 };
 
 type Props = {
@@ -17,16 +21,20 @@ type Props = {
 };
 
 export default function ProductForm({ initial, onSubmit }: Props) {
-  const [form, setForm] = useState<ProductInput>(
-    initial || {
-      productName: "",
-      category: "Food",
-      costPrice: 0,
-      sellingPrice: 0,
-      currentStock: 0,
-      minimumStockThreshold: 0,
-    }
-  );
+ const [form, setForm] = useState<ProductInput>(
+  initial || {
+    productName: "",
+    category: "Food",
+    costPrice: 0,
+    sellingPrice: 0,
+    currentStock: 0,
+    minimumStockThreshold: 0,
+
+    batchNumber: "",
+    manufacturingDate: "",
+    expiryDate: "",
+  }
+);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -81,6 +89,29 @@ export default function ProductForm({ initial, onSubmit }: Props) {
           placeholder="Selling"
           className="border rounded-xl px-3 py-2 dark:bg-slate-900 dark:border-slate-800"
         />
+
+<input
+  name="batchNumber"
+  value={form.batchNumber}
+  onChange={handleChange}
+  placeholder="Batch Number"
+  className="w-full border rounded-xl px-3 py-2 dark:bg-slate-900 dark:border-slate-800"
+/>
+
+<input
+  name="manufacturingDate"
+  type="date"
+  value={form.manufacturingDate}
+  onChange={handleChange}
+  className="w-full border rounded-xl px-3 py-2 dark:bg-slate-900 dark:border-slate-800"
+/>
+<input
+  name="expiryDate"
+  type="date"
+  value={form.expiryDate}
+  onChange={handleChange}
+  className="w-full border rounded-xl px-3 py-2 dark:bg-slate-900 dark:border-slate-800"
+/>
 
       </div>
 
