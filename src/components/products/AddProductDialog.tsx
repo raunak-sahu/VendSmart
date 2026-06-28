@@ -122,7 +122,7 @@ export default function AddProductDialog({ onAdd }: Props) {
               <input
                 name="costPrice"
                 type="number"
-                placeholder="Cost Price"
+                placeholder="Cost Price (₹)"
                 value={form.costPrice}
                 onChange={handleChange}
                 className="
@@ -136,7 +136,7 @@ export default function AddProductDialog({ onAdd }: Props) {
               <input
                 name="sellingPrice"
                 type="number"
-                placeholder="Selling Price"
+                placeholder="Selling Price (₹)"
                 value={form.sellingPrice}
                 onChange={handleChange}
                 className="
@@ -154,7 +154,7 @@ export default function AddProductDialog({ onAdd }: Props) {
               <input
                 name="currentStock"
                 type="number"
-                placeholder="Stock"
+                placeholder="Current Stock Quantity"
                 value={form.currentStock}
                 onChange={handleChange}
                 className="
@@ -168,7 +168,7 @@ export default function AddProductDialog({ onAdd }: Props) {
               <input
                 name="minimumStockThreshold"
                 type="number"
-                placeholder="Min Stock"
+                placeholder="Low Stock Alert Threshold"
                 value={form.minimumStockThreshold}
                 onChange={handleChange}
                 className="

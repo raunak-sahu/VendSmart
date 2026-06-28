@@ -78,21 +78,48 @@ export default function ProductsPage() {
 
   /* ---------------- ADD ---------------- */
 
-  const handleAddProduct = async (product: ProductInput) => {
-    try {
-      await fetch("/api/products", {
+ const handleAddProduct = async (
+  product: ProductInput
+) => {
+  try {
+    const res = await fetch(
+      "/api/products",
+      {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type":
+            "application/json",
         },
-        body: JSON.stringify(product),
-      });
+        body: JSON.stringify(
+          product
+        ),
+      }
+    );
 
-      fetchProducts();
-    } catch (error) {
-      console.error(error);
+    const data =
+      await res.json();
+
+    if (!res.ok) {
+      alert(
+        data.error ||
+          "Failed to add product"
+      );
+      return;
     }
-  };
+
+    fetchProducts();
+
+    alert(
+      `${data.productName} added successfully`
+    );
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Something went wrong"
+    );
+  }
+};
 
   /* ---------------- UPDATE ---------------- */
 

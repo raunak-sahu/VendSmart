@@ -41,10 +41,33 @@ export default function ProductFilters({
           text-slate-900 dark:text-white
         "
       >
-        <option value="all">All</option>
-        <option value="Food">Food</option>
-        <option value="Drinks">Drinks</option>
-        <option value="Electronics">Electronics</option>
+      <option value="Beverages">
+  Beverages
+</option>
+
+<option value="Snacks">
+  Snacks
+</option>
+
+<option value="Dairy">
+  Dairy
+</option>
+
+<option value="Bakery">
+  Bakery
+</option>
+
+<option value="Frozen Foods">
+  Frozen Foods
+</option>
+
+<option value="Personal Care">
+  Personal Care
+</option>
+
+<option value="Household">
+  Household
+</option>
       </select>
 
     </div>

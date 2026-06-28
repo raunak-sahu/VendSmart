@@ -22,10 +22,37 @@ export async function POST(req: Request) {
       sellingPrice: Number(body.sellingPrice),
       currentStock: Number(body.currentStock),
       minimumStockThreshold: Number(body.minimumStockThreshold),
-      batchNumber: body.batchNumber,
-      manufacturingDate: new Date(body.manufacturingDate),
-      expiryDate: new Date(body.expiryDate),
-      vendorId: body.vendorId,
+   batchNumber:
+  body.batchNumber ||
+  `BATCH-${Date.now()}`,
+
+manufacturingDate:
+  body.manufacturingDate
+    ? new Date(
+        body.manufacturingDate
+      )
+    : new Date(),
+
+expiryDate:
+  body.expiryDate
+    ? new Date(
+        body.expiryDate
+      )
+    : new Date(
+        Date.now() +
+        365 *
+          24 *
+          60 *
+          60 *
+          1000
+      ),
+
+vendorId:
+  body.vendorId ||
+  (
+    await prisma.vendor.findFirst()
+  )?.id ||
+  "",
     },
   });
 
