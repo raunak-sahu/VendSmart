@@ -42,7 +42,9 @@ export default function AddProductDialog({ onAdd }: Props) {
   const handleSubmit = () => {
     if (!form.productName) return;
 
-    onAdd(form);
+console.log("FORM DATA:", form);
+
+onAdd(form);
 
     setForm({
       productName: "",
