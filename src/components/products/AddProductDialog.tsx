@@ -5,10 +5,10 @@ import { useState } from "react";
 type ProductInput = {
   productName: string;
   category: string;
-  costPrice: number;
-  sellingPrice: number;
-  currentStock: number;
-  minimumStockThreshold: number;
+  costPrice: number | string;
+  sellingPrice: number | string;
+  currentStock: number | string;
+  minimumStockThreshold: number | string;
 };
 
 type Props = {
@@ -18,14 +18,14 @@ type Props = {
 export default function AddProductDialog({ onAdd }: Props) {
   const [open, setOpen] = useState(false);
 
-  const [form, setForm] = useState<ProductInput>({
-    productName: "",
-    category: "Food",
-    costPrice: 0,
-    sellingPrice: 0,
-    currentStock: 0,
-    minimumStockThreshold: 0,
-  });
+const [form, setForm] = useState({
+  productName: "",
+  category: "Food",
+  costPrice: "",
+  sellingPrice: "",
+  currentStock: "",
+  minimumStockThreshold: "",
+});
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -44,17 +44,24 @@ export default function AddProductDialog({ onAdd }: Props) {
 
 console.log("FORM DATA:", form);
 
-onAdd(form);
+onAdd({
+  ...form,
+  costPrice: Number(form.costPrice),
+  sellingPrice: Number(form.sellingPrice),
+  currentStock: Number(form.currentStock),
+  minimumStockThreshold: Number(
+    form.minimumStockThreshold
+  ),
+});
 
-    setForm({
-      productName: "",
-      category: "Food",
-      costPrice: 0,
-      sellingPrice: 0,
-      currentStock: 0,
-      minimumStockThreshold: 0,
-    });
-
+ setForm({
+  productName: "",
+  category: "Food",
+  costPrice: "",
+  sellingPrice: "",
+  currentStock: "",
+  minimumStockThreshold: "",
+});
     setOpen(false);
   };
 
