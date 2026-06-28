@@ -81,26 +81,30 @@ export async function POST(
             body.batchNumber ||
             `BATCH-${Date.now()}`,
 
-          manufacturingDate:
-            body.manufacturingDate
-              ? new Date(
-                  body.manufacturingDate
-                )
-              : new Date(),
+         manufacturingDate:
+  body.manufacturingDate &&
+  !isNaN(
+    Date.parse(body.manufacturingDate)
+  )
+    ? new Date(
+        body.manufacturingDate
+      )
+    : new Date(),
 
-          expiryDate:
-            body.expiryDate
-              ? new Date(
-                  body.expiryDate
-                )
-              : new Date(
-                  Date.now() +
-                    365 *
-                      24 *
-                      60 *
-                      60 *
-                      1000
-                ),
+expiryDate:
+  body.expiryDate &&
+  !isNaN(
+    Date.parse(body.expiryDate)
+  )
+    ? new Date(body.expiryDate)
+    : new Date(
+        Date.now() +
+          365 *
+            24 *
+            60 *
+            60 *
+            1000
+      ),
 
           vendorId:
             body.vendorId ||

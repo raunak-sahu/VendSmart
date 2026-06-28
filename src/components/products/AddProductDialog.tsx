@@ -50,37 +50,47 @@ const [form, setForm] = useState<ProductInput>({
     });
   };
 
-  const handleSubmit = () => {
-    if (!form.productName) return;
+  const handleSubmit = async () => {
+  if (!form.productName) return;
 
-console.log("FORM DATA:", form);
+  if (!form.manufacturingDate || !form.expiryDate) {
+    alert(
+      "Please select both Manufacturing Date and Expiry Date."
+    );
+    return;
+  }
 
-onAdd({
-  ...form,
-  costPrice: Number(form.costPrice),
-  sellingPrice: Number(form.sellingPrice),
-  currentStock: Number(form.currentStock),
-  minimumStockThreshold: Number(
-    form.minimumStockThreshold
-  ),
-});
+  console.log("FORM DATA:", form);
 
-setForm({
-  productName: "",
-  category: "Food",
+  await onAdd({
+    ...form,
+    costPrice: Number(form.costPrice),
+    sellingPrice: Number(form.sellingPrice),
+    currentStock: Number(form.currentStock),
+    minimumStockThreshold: Number(
+      form.minimumStockThreshold
+    ),
+  });
 
-  costPrice: 0,
-  sellingPrice: 0,
+  setForm({
+    productName: "",
+    category: "Food",
 
-  currentStock: 0,
-  minimumStockThreshold: 0,
+    costPrice: 0,
+    sellingPrice: 0,
 
-  batchNumber: "",
-  manufacturingDate: "",
-  expiryDate: "",
-});
-    setOpen(false);
-  };
+    currentStock: 0,
+    minimumStockThreshold: 0,
+
+    batchNumber: "",
+    manufacturingDate: "",
+    expiryDate: "",
+  });
+
+  setOpen(false);
+};
+
+
 
   return (
     <>
