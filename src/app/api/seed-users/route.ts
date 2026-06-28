@@ -1,50 +1,54 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  const password = await bcrypt.hash("123456", 10);
+  const password =
+    await bcrypt.hash(
+      "password123",
+      10
+    );
 
-  const vendor = await prisma.vendor.upsert({
-    where: { id: "default-vendor" },
+  await prisma.user.upsert({
+    where: {
+      email: "admin@vend.com",
+    },
     update: {},
     create: {
-      id: "default-vendor",
-      vendorName: "Default Vendor",
-      companyName: "VendSmart",
-      gstNumber: "GST123456789",
-      phoneNumber: "9999999999",
-      email: "vendor@vendsmart.com",
-      address: "Default Address",
-      paymentTerms: "Net 30",
-      status: "ACTIVE",
+      name: "Admin User",
+      email: "admin@vend.com",
+      password,
+      role: "ADMIN",
     },
   });
 
   await prisma.user.upsert({
-    where: { email: "manager@vendsmart.com" },
+    where: {
+      email: "manager@vend.com",
+    },
     update: {},
     create: {
-      name: "Manager",
-      email: "manager@vendsmart.com",
+      name: "Manager User",
+      email: "manager@vend.com",
       password,
       role: "MANAGER",
-      vendorId: vendor.id,
     },
   });
 
   await prisma.user.upsert({
-    where: { email: "employee@vendsmart.com" },
+    where: {
+      email: "employee@vend.com",
+    },
     update: {},
     create: {
-      name: "Employee",
-      email: "employee@vendsmart.com",
+      name: "Employee User",
+      email: "employee@vend.com",
       password,
       role: "EMPLOYEE",
-      vendorId: vendor.id,
     },
   });
 
-  return Response.json({
+  return NextResponse.json({
     success: true,
   });
 }

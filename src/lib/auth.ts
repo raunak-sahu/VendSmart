@@ -1,24 +1,28 @@
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 const JWT_SECRET =
-  process.env.JWT_SECRET || "secret123";
+  process.env.JWT_SECRET ||
+  "vendsmart_secure_local_key";
 
-export function verifyToken(token: string) {
+export type TokenPayload = {
+  id: string;
+  email: string;
+  role: "ADMIN" | "MANAGER" | "EMPLOYEE";
+  vendorId?: string | null;
+  iat?: number;
+  exp?: number;
+};
+
+export function verifyToken(
+  token: string
+): TokenPayload | null {
   try {
-    const decoded = jwt.verify(
+    return jwt.verify(
       token,
       JWT_SECRET
-    );
-
-    console.log("DECODED TOKEN:", decoded);
-
-    return decoded as {
-      userId: string;
-      vendorId: string;
-      role: string;
-    };
-  } catch (error) {
-    console.error("JWT VERIFY ERROR:", error);
+    ) as TokenPayload;
+  } catch (err) {
+    console.error("JWT VERIFY ERROR:", err);
     return null;
   }
 }

@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    container_name: vendsmart-db
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vendsmart
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: vendsmart-app
+    depends_on:
+      - db
+
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/vendsmart?schema=public
+      JWT_SECRET: VendSmartSecure2025
+
+    ports:
+      - "3002:3000"
+
+volumes:
+  postgres_data:

@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,20 +17,76 @@ import {
 import clsx from "clsx";
 
 const links = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Products", href: "/products", icon: Package },
-  { name: "Sales", href: "/sales", icon: ShoppingCart },
-  { name: "Purchases", href: "/purchases", icon: Boxes },
-  { name: "Vendors", href: "/vendors", icon: Truck },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Reports", href: "/reports", icon: FileText },
-  { name: "Inventory", href: "/inventory-history", icon: History },
-  { name: "Settings", href: "/settings", icon: Settings },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    roles: ["ADMIN", "MANAGER", "EMPLOYEE"],
+  },
+  {
+    name: "Products",
+    href: "/products",
+    icon: Package,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Sales",
+    href: "/sales",
+    icon: ShoppingCart,
+    roles: ["ADMIN", "MANAGER", "EMPLOYEE"],
+  },
+  {
+    name: "Purchases",
+    href: "/purchases",
+    icon: Boxes,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Vendors",
+    href: "/vendors",
+    icon: Truck,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    icon: BarChart3,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Reports",
+    href: "/reports",
+    icon: FileText,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Inventory",
+    href: "/inventory-history",
+    icon: History,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Settings",
+    href: "/settings",
+    icon: Settings,
+    roles: ["ADMIN"],
+  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+const [role, setRole] =
+  useState("EMPLOYEE");
 
+useEffect(() => {
+  fetch("/api/auth/me")
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.user?.role) {
+        setRole(data.user.role);
+      }
+    });
+}, []);
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
 
@@ -54,8 +110,12 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
-        {links.map((link) => {
+    <nav className="flex-1 p-4 space-y-1">
+  {links
+    .filter((link) =>
+      link.roles.includes(role)
+    )
+    .map((link) => {
           const Icon = link.icon;
 
           const active = isActive(link.href);

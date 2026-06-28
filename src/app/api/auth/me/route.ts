@@ -1,4 +1,3 @@
-// src/app/api/auth/me/route.ts
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
@@ -15,9 +14,18 @@ export async function GET(req: Request) {
   }
 
   try {
-    const decoded = jwt.verify(token, "secret123");
-    return NextResponse.json({ user: decoded });
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET ||
+      "vendsmart_secure_local_key"
+    );
+
+    return NextResponse.json({
+      user: decoded,
+    });
   } catch {
-    return NextResponse.json({ user: null });
+    return NextResponse.json({
+      user: null,
+    });
   }
 }

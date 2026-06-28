@@ -6,63 +6,83 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { name, companyName, email, password } = body;
+    const existingUser =
+      await prisma.user.findUnique({
+        where: {
+          email: body.email,
+        },
+      });
 
-    if (!name || !companyName || !email || !password) {
+    if (existingUser) {
       return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
+        {
+          error:
+            "User already exists",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    const existing = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        { error: "Email already registered" },
-        { status: 400 }
+    const hashedPassword =
+      await bcrypt.hash(
+        body.password,
+        10
       );
-    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const vendor =
+      await prisma.vendor.create({
+        data: {
+          vendorName:
+            body.name,
+          companyName:
+            body.companyName ||
+            "Default Company",
+          gstNumber:
+            "NA",
+          phoneNumber:
+            body.phone ||
+            "NA",
+          email:
+            body.email,
+          address:
+            "Not Provided",
+          paymentTerms:
+            "30 Days",
+          status:
+            "ACTIVE",
+        },
+      });
 
-    const vendor = await prisma.vendor.create({
-      data: {
-        vendorName: name,
-        companyName,
-        gstNumber: "",
-        phoneNumber: "",
-        email,
-        address: "",
-        paymentTerms: "",
-        status: "ACTIVE",
-      },
-    });
-
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: "ADMIN",
-        vendorId: vendor.id,
-      },
-    });
+    const user =
+      await prisma.user.create({
+        data: {
+          name: body.name,
+          email: body.email,
+          password:
+            hashedPassword,
+          role: "ADMIN",
+          vendorId:
+            vendor.id,
+        },
+      });
 
     return NextResponse.json({
       success: true,
       user,
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
 
     return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
+      {
+        error:
+          "Signup failed",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

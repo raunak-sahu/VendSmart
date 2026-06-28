@@ -1,62 +1,89 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  console.log("EMAIL:", body.email);
+    if (!body.email || !body.password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email: body.email,
-    },
-  });
+    const email = body.email.toLowerCase().trim();
 
-  console.log("USER FOUND:", !!user);
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-  if (!user) {
+    if (!user) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    const validPassword = await bcrypt.compare(
+      body.password,
+      user.password
+    );
+
+    if (!validPassword) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    // ✅ MUST match middleware + auth.ts everywhere
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      throw new Error("JWT_SECRET is missing in environment variables");
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        vendorId: user.vendorId ?? null,
+      },
+      secret,
+      { expiresIn: "7d" }
+    );
+
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+
+    response.cookies.set({
+      name: "token",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
     return NextResponse.json(
-      { error: "Invalid credentials" },
-      { status: 401 }
+      { error: "Internal server error" },
+      { status: 500 }
     );
   }
-
-  const valid = await bcrypt.compare(
-    body.password,
-    user.password
-  );
-
-  console.log("PASSWORD MATCH:", valid);
-
-  if (!valid) {
-    return NextResponse.json(
-      { error: "Invalid credentials" },
-      { status: 401 }
-    );
-  }
-const token = jwt.sign(
-  {
-    userId: user.id,
-    vendorId: user.vendorId,
-    role: user.role,
-  },
-  process.env.JWT_SECRET || "secret123"
-);
-
-  const response = NextResponse.json({
-    success: true,
-    user,
-  });
-
-  response.cookies.set({
-    name: "token",
-    value: token,
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-  });
-
-  return response;
 }

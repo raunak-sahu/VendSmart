@@ -5,18 +5,46 @@ export async function GET() {
   const products =
     await prisma.product.findMany();
 
-  const lowStock = products.filter(
-    (p) =>
-      p.currentStock <=
-      p.minimumStockThreshold
-  ).length;
-
   const notifications = [];
 
-  if (lowStock > 0) {
+  const lowStockProducts =
+    products.filter(
+      (p) =>
+        p.currentStock <=
+        p.minimumStockThreshold
+    );
+
+  if (lowStockProducts.length > 0) {
     notifications.push({
-      type: "warning",
-      message: `${lowStock} products are low in stock`,
+      severity: "high",
+      message: `${lowStockProducts.length} products are below stock threshold`,
+    });
+  }
+
+  const expiringProducts =
+    products.filter((p) => {
+      const days =
+        (new Date(
+          p.expiryDate
+        ).getTime() -
+          Date.now()) /
+        (1000 * 60 * 60 * 24);
+
+      return days <= 30 && days > 0;
+    });
+
+  if (expiringProducts.length > 0) {
+    notifications.push({
+      severity: "medium",
+      message: `${expiringProducts.length} products expire within 30 days`,
+    });
+  }
+
+  if (notifications.length === 0) {
+    notifications.push({
+      severity: "low",
+      message:
+        "All systems operational",
     });
   }
 
