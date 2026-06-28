@@ -23,10 +23,9 @@ type Product = {
   stockStatus?: "LOW" | "MEDIUM" | "OK";
 };
 
-type ProductInput = Omit<
-  Product,
-  "id" | "profit" | "stockStatus"
->;
+import type {
+  ProductInput,
+} from "@/components/products/AddProductDialog";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -78,9 +77,9 @@ export default function ProductsPage() {
 
   /* ---------------- ADD ---------------- */
 
- const handleAddProduct = async (
+const handleAddProduct = async (
   product: ProductInput
-) => {
+): Promise<void> => {
   try {
     const res = await fetch(
       "/api/products",

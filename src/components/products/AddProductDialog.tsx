@@ -1,18 +1,23 @@
 "use client";
 
 import { useState } from "react";
-
-type ProductInput = {
+export type ProductInput = {
   productName: string;
   category: string;
-  costPrice: number | string;
-  sellingPrice: number | string;
-  currentStock: number | string;
-  minimumStockThreshold: number | string;
+  costPrice: number;
+  sellingPrice: number;
+  currentStock: number;
+  minimumStockThreshold: number;
+  batchNumber?: string;
+  manufacturingDate?: string;
+  expiryDate?: string;
+  vendorId?: string;
 };
 
 type Props = {
-  onAdd: (product: ProductInput) => void;
+  onAdd: (
+    product: ProductInput
+  ) => void | Promise<void>;
 };
 
 export default function AddProductDialog({ onAdd }: Props) {
