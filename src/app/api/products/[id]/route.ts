@@ -1,96 +1,69 @@
-import {
-  NextResponse,
-} from "next/server";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-import {
-  prisma,
-} from "@/lib/prisma";
+type RouteParams = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
 export async function GET(
   req: Request,
-  {
-    params,
-  }: {
-    params: {
-      id: string;
-    };
-  }
+  { params }: RouteParams
 ) {
+  const { id } = await params;
+
   const product =
     await prisma.product.findUnique({
       where: {
-        id: params.id,
+        id,
       },
     });
 
-  return NextResponse.json(
-    product
-  );
-}
-
-export async function PUT(
-  req: Request,
-  {
-    params,
-  }: {
-    params: {
-      id: string;
-    };
-  }
-) {
-  const body = await req.json();
-
-  const updatedProduct = await prisma.product.update({
-    where: {
-      id: params.id,
-    },
-    data: {
-      productName: body.productName,
-      category: body.category,
-
-      costPrice: Number(body.costPrice),
-      sellingPrice: Number(body.sellingPrice),
-
-      currentStock: Number(body.currentStock),
-      minimumStockThreshold: Number(body.minimumStockThreshold),
-
-      // ✅ ADD THESE (IMPORTANT)
-      batchNumber: body.batchNumber,
-
-      manufacturingDate:
-        body.manufacturingDate &&
-        !isNaN(Date.parse(body.manufacturingDate))
-          ? new Date(body.manufacturingDate)
-          : undefined,
-
-      expiryDate:
-        body.expiryDate &&
-        !isNaN(Date.parse(body.expiryDate))
-          ? new Date(body.expiryDate)
-          : undefined,
-    },
-  });
-
-  return NextResponse.json(updatedProduct);
+  return NextResponse.json(product);
 }
 
 export async function DELETE(
   req: Request,
-  {
-    params,
-  }: {
-    params: {
-      id: string;
-    };
-  }
+  { params }: RouteParams
 ) {
+  const { id } = await params;
+
   await prisma.product.delete({
     where: {
-      id: params.id,
+      id,
     },
   });
 
   return NextResponse.json({
     success: true,
   });
+}
+
+export async function PUT(
+  req: Request,
+  { params }: RouteParams
+) {
+  const { id } = await params;
+
+  const body = await req.json();
+
+  const updated =
+    await prisma.product.update({
+      where: {
+        id,
+      },
+      data: {
+        productName: body.productName,
+        category: body.category,
+        costPrice: Number(body.costPrice),
+        sellingPrice: Number(body.sellingPrice),
+        currentStock: Number(body.currentStock),
+        minimumStockThreshold: Number(
+          body.minimumStockThreshold
+        ),
+      },
+    });
+
+  return NextResponse.json(updated);
 }
