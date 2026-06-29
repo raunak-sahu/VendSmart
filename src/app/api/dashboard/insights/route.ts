@@ -1,9 +1,25 @@
+import jwt from "jsonwebtoken";
+import {cookies} from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     // Run queries in parallel (FASTER)
+    const token = (await cookies()).get("token")?.value;
+
+let role = "SALESPERSON";
+
+if (token) {
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET || "secret123"
+  ) as {
+    role: string;
+  };
+
+  role = decoded.role;
+}
     const [revenue, profit, products, topProducts] =
       await Promise.all([
         prisma.salesBill.aggregate({
@@ -68,13 +84,27 @@ export async function GET() {
       topProduct = product?.productName || "N/A";
     }
 
+    
+    if (role=="ADMIN"){
+      return NextResponse.json({
+        role,revenue:
+        revenue._sum.totalAmount?? 0,
+        profit: profit._sum.profit?? 0,
+        inventoryValue,lowStock,topProduct,
+      });
+    }
+    if(role=="MANAGER"){
+      return NextResponse.json({
+        role,revenue:revenue._sum.totalAmount?? 0,
+        inventoryValue,
+        lowStock,topProduct,
+      });
+    }
     return NextResponse.json({
-      revenue: revenue._sum.totalAmount ?? 0,
-      profit: profit._sum.profit ?? 0,
-      inventoryValue,
-      lowStock,
-      topProduct,
-    });
+  role,
+  lowStock,
+  topProduct,
+});
   } catch (error) {
     console.error("Insights API Error:", error);
 

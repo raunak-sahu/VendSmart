@@ -18,6 +18,9 @@ type Dashboard = {
   profit: number;
   inventoryValue: number;
   lowStock: number;
+
+  topProduct: string;
+  role?: string;
 };
 
 type User = {
@@ -51,7 +54,7 @@ export default function DashboardPage() {
       });
   }, []);
 
- useEffect(() => {
+useEffect(() => {
   fetch("/api/auth/me", {
     credentials: "include",
   })
@@ -61,17 +64,24 @@ export default function DashboardPage() {
 
       if (!data.user) {
         router.replace("/login");
+        return;
       }
+
+      setUser(data.user);
     });
-}, []);
+}, [router]);
 
   return (
-    <div className="space-y-6">
+  
+  <div className="space-y-6">
 
-      <DashboardHeader />
+    <DashboardHeader />
 
-      <KPICards data={data} />
+    <KPICards data={data} />
 
+    {/* ADMIN + MANAGER */}
+    {(role === "ADMIN" ||
+      role === "MANAGER") && (
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 
         <div className="xl:col-span-2">
@@ -81,7 +91,21 @@ export default function DashboardPage() {
         <Notifications />
 
       </div>
+    )}
 
+    {/* SALESPERSON */}
+    {role === "SALESPERSON" && (
+      <div className="grid gap-6 sm:grid-cols-2">
+
+        <Notifications />
+
+        <TopSellingProducts />
+
+      </div>
+    )}
+
+    {/* ADMIN */}
+    {role === "ADMIN" && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <TopSellingProducts />
@@ -91,12 +115,27 @@ export default function DashboardPage() {
         <DeadStock />
 
       </div>
+    )}
 
-      {(role === "ADMIN" ||
-        role === "MANAGER") && (
-        <VendorSpend />
-      )}
+    {/* MANAGER */}
+    {role === "MANAGER" && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
+        <TopSellingProducts />
+
+        <LowStockAlerts />
+
+      </div>
+    )}
+
+    {/* Vendor Spend */}
+    {(role === "ADMIN" ||
+      role === "MANAGER") && (
+      <VendorSpend />
+    )}
+
+    {/* ADMIN */}
+    {role === "ADMIN" && (
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
 
         <ActivityFeed />
@@ -104,7 +143,30 @@ export default function DashboardPage() {
         <NotificationsPanel />
 
       </div>
+    )}
 
-    </div>
-  );
+    {/* MANAGER */}
+    {role === "MANAGER" && (
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+
+        <ActivityFeed />
+
+        <NotificationsPanel />
+
+      </div>
+    )}
+
+    {/* SALESPERSON */}
+    {role === "SALESPERSON" && (
+      <div className="mt-8">
+
+        <ActivityFeed />
+
+      </div>
+    )}
+
+  </div>
+);
+ 
+  
 }
