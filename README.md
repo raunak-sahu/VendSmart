@@ -2,7 +2,7 @@
 VendSmart is a full-stack inventory management web application built using Next.js, React, TypeScript, Prisma ORM, and PostgreSQL (Neon).
 It helps manage products, vendors, stock, batches, and sales with real-time tracking and a simple dashboard.
 
-Live Demo: https://vend-smart-git-main-raunak-sahu-s-projects.vercel.app/dashboard
+Live Demo: https://vend-smart-one.vercel.app/dashboard
 
 Demo Login: Admin Email id: admin@gmail.com
                   password: admin
