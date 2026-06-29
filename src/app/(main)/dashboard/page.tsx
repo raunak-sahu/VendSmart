@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -20,7 +21,7 @@ type Dashboard = {
   lowStock: number;
 
   topProduct: string;
-  role?: string;
+  
 };
 
 type User = {
@@ -54,119 +55,119 @@ export default function DashboardPage() {
       });
   }, []);
 
-useEffect(() => {
-  fetch("/api/auth/me", {
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
+  useEffect(() => {
+    fetch("/api/auth/me", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
 
-      if (!data.user) {
-        router.replace("/login");
-        return;
-      }
+        if (!data.user) {
+          router.replace("/login");
+          return;
+        }
 
-      setUser(data.user);
-    });
-}, [router]);
+        setUser(data.user);
+      });
+  }, [router]);
 
   return (
-  
-  <div className="space-y-6">
+    <div className="space-y-6">
 
-    <DashboardHeader />
+      <DashboardHeader />
 
-    <KPICards data={data} />
+      <KPICards
+        data={data}
+        role={role}
+      />
 
-    {/* ADMIN + MANAGER */}
-    {(role === "ADMIN" ||
-      role === "MANAGER") && (
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {/* ADMIN + MANAGER */}
+      {(role === "ADMIN" ||
+        role === "MANAGER") && (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 
-        <div className="xl:col-span-2">
-          <ProfitChart />
+          <div className="xl:col-span-2">
+            <ProfitChart />
+          </div>
+
+          <Notifications />
+
         </div>
+      )}
 
-        <Notifications />
+      {/* SALESPERSON */}
+      {role === "SALESPERSON" && (
+        <div className="grid gap-6 sm:grid-cols-2">
 
-      </div>
-    )}
+          <Notifications />
 
-    {/* SALESPERSON */}
-    {role === "SALESPERSON" && (
-      <div className="grid gap-6 sm:grid-cols-2">
+          <TopSellingProducts />
 
-        <Notifications />
+        </div>
+      )}
 
-        <TopSellingProducts />
+      {/* ADMIN */}
+      {role === "ADMIN" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      </div>
-    )}
+          <TopSellingProducts />
 
-    {/* ADMIN */}
-    {role === "ADMIN" && (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <LowStockAlerts />
 
-        <TopSellingProducts />
+          <DeadStock />
 
-        <LowStockAlerts />
+        </div>
+      )}
 
-        <DeadStock />
+      {/* MANAGER */}
+      {role === "MANAGER" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      </div>
-    )}
+          <TopSellingProducts />
 
-    {/* MANAGER */}
-    {role === "MANAGER" && (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <LowStockAlerts />
 
-        <TopSellingProducts />
+        </div>
+      )}
 
-        <LowStockAlerts />
+      {/* Vendor Spend */}
+      {(role === "ADMIN" ||
+        role === "MANAGER") && (
+        <VendorSpend />
+      )}
 
-      </div>
-    )}
+      {/* ADMIN */}
+      {role === "ADMIN" && (
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
 
-    {/* Vendor Spend */}
-    {(role === "ADMIN" ||
-      role === "MANAGER") && (
-      <VendorSpend />
-    )}
+          <ActivityFeed />
 
-    {/* ADMIN */}
-    {role === "ADMIN" && (
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <NotificationsPanel />
 
-        <ActivityFeed />
+        </div>
+      )}
 
-        <NotificationsPanel />
+      {/* MANAGER */}
+      {role === "MANAGER" && (
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
 
-      </div>
-    )}
+          <ActivityFeed />
 
-    {/* MANAGER */}
-    {role === "MANAGER" && (
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <NotificationsPanel />
 
-        <ActivityFeed />
+        </div>
+      )}
 
-        <NotificationsPanel />
+      {/* SALESPERSON */}
+      {role === "SALESPERSON" && (
+        <div className="mt-8">
 
-      </div>
-    )}
+          <ActivityFeed />
 
-    {/* SALESPERSON */}
-    {role === "SALESPERSON" && (
-      <div className="mt-8">
+        </div>
+      )}
 
-        <ActivityFeed />
-
-      </div>
-    )}
-
-  </div>
-);
- 
-  
+    </div>
+  );
 }
